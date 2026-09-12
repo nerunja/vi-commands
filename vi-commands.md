@@ -3,6 +3,10 @@
 > Personal notes, cleaned up and organized by category.
 > Original notes started: 15-May-2016
 
+**Key notation used below:** `Ctrl-x` means hold Control and press `x`.
+This matches Vim's own `:help` docs, which write it as `CTRL-X` (e.g. `:help CTRL-V`) — same key, just style/case.
+Code blocks that show actual `.vimrc` mapping syntax use Vim's angle-bracket form instead (e.g. `<C-r>`, `<Esc>`, `<CR>`), since that's the literal syntax Vim expects in a mapping.
+
 ## Table of Contents
 
 - [Quick Reference / Handy One-Liners](#quick-reference--handy-one-liners)
@@ -45,7 +49,7 @@
 
 | Command | Description |
 |---|---|
-| `Ctrl+R` (in command-line, after `:` and `/`) | Paste system clipboard text into command line to search/use |
+| `Ctrl-r` (in command-line, after `:` and `/`) | Paste system clipboard text into command line to search/use |
 | `:bro[wse] ol[dfiles]` | List recently opened files with numbers; type number + Enter to open (space to page, `q` to quit) |
 | `:ol[dfiles]` | Show recent files list; open file *n* with `:e #<n>` |
 | `:Vex d:\n<Tab>` | Open a vertically split file explorer at `d:\n...` |
@@ -118,6 +122,8 @@
 | `Ctrl-o` | Jump back to older cursor position (jump list) |
 | `Ctrl-i` | Jump forward to newer cursor position (jump list) |
 
+---
+
 ## Screen Movement
 
 | Command | Description |
@@ -126,6 +132,8 @@
 | `zt` | Scroll so cursor line is at top of screen |
 | `zb` | Scroll so cursor line is at bottom of screen |
 | `zz` | Alias for `z.` in most configs |
+
+---
 
 ## Words vs WORDs
 
@@ -279,7 +287,7 @@ Vim has **nine types of registers**:
 1. Enter insert mode (`i`, `a`, `A`, etc.)
 2. Press `Ctrl-r` followed by a register name to insert its text inline:
    - `Ctrl-r "` — insert from the unnamed (last yank/delete) register
-   - `Ctrl-r *` — insert from the SYSTEM clipboard
+   - `Ctrl-r *` — insert from the system clipboard
    - `Ctrl-r <a-zA-Z>` — insert from any named register
 
 > `"` is the register-selector prefix; after pressing `Ctrl-r`, Vim shows a `"` at the cursor and waits for you to name the register.
@@ -365,6 +373,32 @@ See `:help v_b_I` for details.
 | `:%s/^\(.*\)\n\1$/\1/` | Remove consecutive duplicate lines |
 | `:%s/,/\r/g` | Replace every comma with an end-of-line (splits into new lines) |
 | `:%s/^/\=line(".") . ". "/` | Prefix every line with its line number |
+
+### Use a Visual Selection as the Search Pattern (replace across whole file)
+
+To replace every occurrence of some text in the file with something else, without typing the search text yourself:
+
+1. Visually select the text you want to search for (`v`, `V`, or `Ctrl-v`).
+2. Yank it: `y`
+3. Type `:%s/`, then press `Ctrl-r` followed by `"` to paste the last yank in as the search pattern, then type `/replacement/g` and press Enter:
+   ```
+   :%s/                <- type this
+   Ctrl-r  "           <- press these two keys to paste the yank
+   /replacement/g      <- finish typing this, then Enter
+   ```
+
+**If the selected text has special regex characters** (`.`, `*`, `/`, `[`, `\`, etc.), paste it literally and safely using `\V` (very-nomagic) with `escape()` — this is real Vim command-line syntax, typed as shown:
+```
+:%s/\V<C-r>=escape(@", '/\')<CR>/replacement/g
+```
+- `\V` — turns off regex magic so the pasted text is matched almost literally
+- `<C-r>=escape(@", '/\')<CR>` — evaluates an expression that escapes `/` and `\` in register `"` before inserting it (`<C-r>` and `<CR>` here are literal keys you press: Ctrl-r and Enter)
+
+**Reusable mapping** — add to `.vimrc`/`_vimrc`:
+```vim
+vnoremap <leader>s y:%s/\V<C-r>=escape(@", '/\')<CR>//g<Left><Left>
+```
+Select text → `<leader>s` → cursor lands between the last two `/` → type the replacement → Enter.
 
 ### Find/Replace Within a Visual Selection
 
@@ -547,6 +581,8 @@ To review each change before saving:
 | `Ctrl-w _` | Maximize height of current window |
 | `Ctrl-w \|` | Maximize width of current window |
 
+---
+
 ## File Explorer (netrw)
 
 | Command | Description |
@@ -669,6 +705,8 @@ Reference: http://www.troubleshooters.com/linux/vifont.htm
 > set guifont=Monospace\ 12
 > ```
 
+---
+
 ## Changing the Color Scheme
 
 1. Note the scheme name at **gVim → Edit → Color Scheme**
@@ -711,7 +749,7 @@ A: `p` (paste) implicitly yanks any text it *replaces* into the unnamed register
 ```
 Alternatively, use the numbered register `"0`, which always holds the last **yank** (not delete): `"0p`.
 
-**Q: Where can I find standard editor shortcuts (Ctrl-C/V/etc.) in Vim?**
+**Q: Where can I find standard editor shortcuts (Ctrl-c/Ctrl-v/etc.) in Vim?**
 A: http://vim.wikia.com/wiki/Using_standard_editor_shortcuts_in_Vim
 
 **Q: How do I see all my registers at once?**
