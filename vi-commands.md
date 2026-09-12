@@ -49,7 +49,8 @@ Code blocks that show actual `.vimrc` mapping syntax use Vim's angle-bracket for
 
 | Command | Description |
 |---|---|
-| `Ctrl-r` (in command-line, after `:` and `/`) | Paste system clipboard text into command line to search/use |
+| `Ctrl-r *` (in command-line, after `:` or `/`) | Paste system clipboard text into the command line to search/use |
+| `Ctrl-r "` (in command-line, after `:` or `/`) | Paste last yank/delete (unnamed register) into the command line |
 | `:bro[wse] ol[dfiles]` | List recently opened files with numbers; type number + Enter to open (space to page, `q` to quit) |
 | `:ol[dfiles]` | Show recent files list; open file *n* with `:e #<n>` |
 | `:Vex d:\n<Tab>` | Open a vertically split file explorer at `d:\n...` |
@@ -60,7 +61,7 @@ Code blocks that show actual `.vimrc` mapping syntax use Vim's angle-bracket for
 | `"*yy` | Yank current line to system clipboard (no newline) |
 | `vt"y` | Select up to (not including) the next `"` and yank — cursor must start right after opening quote |
 | `vt"p` | Same selection, but paste over it |
-| `v%` | Select the block enclosed by `{}`, `()`, or `[]` — cursor must be on the opening bracket |
+| `v%` | Select (character-wise) the block enclosed by `{}`, `()`, or `[]` — cursor must be on one of the brackets (opening or closing). Using `V%` instead selects all *whole lines* from the cursor to the matching bracket, not just the enclosed content — usually not what you want here |
 | `*` / `#` | Find next / previous occurrence of word under cursor |
 | `:'<,'>s/red/green/g` | Find & replace only within a visually selected range of **lines** |
 | `:s/\%Vold/new/g` | Find & replace only within the exact visually selected **characters** (`%V` atom) |
@@ -128,10 +129,12 @@ Code blocks that show actual `.vimrc` mapping syntax use Vim's angle-bracket for
 
 | Command | Description |
 |---|---|
-| `z.` | Center screen on cursor line |
+| `z.` | Center screen on cursor line, moving cursor to first non-blank char |
+| `zz` | Center screen on cursor line, keeping the current column (unlike `z.`) |
 | `zt` | Scroll so cursor line is at top of screen |
 | `zb` | Scroll so cursor line is at bottom of screen |
-| `zz` | Alias for `z.` in most configs |
+
+> `z<CR>` and `z-` are the "move to first non-blank" variants of `zt` and `zb` — same relationship as `z.` has to `zz`.
 
 ---
 
@@ -246,7 +249,7 @@ Vim has **nine types of registers**:
 4. Named registers `"a`–`"z` / `"A`–`"Z` — user-managed; uppercase **appends** instead of overwriting
 5. Read-only registers `":`, `".`, `"%`, `"#` — last command, last inserted text, current filename, alternate filename
 6. The expression register `"=` — evaluate an expression and insert the result
-7. Selection/drop registers `"*`, `"+`, `"~` — system clipboard, X11 selection, drag-and-drop
+7. Selection/drop registers `"*`, `"+`, `"~` — `"*` is the system clipboard (Windows/macOS) or the X11 PRIMARY selection (Linux); `"+` is the X11 CLIPBOARD selection (Linux only — same as `"*` on Windows/macOS); `"~` holds the last drag-and-dropped text
 8. The black-hole register `"_` — discard text without affecting other registers
 9. Last search-pattern register `"/`
 
@@ -276,7 +279,7 @@ Vim has **nine types of registers**:
 | `"*p` | Paste from system clipboard |
 | `v$"*y` | Visually select to end of line and copy to system clipboard |
 | `v}"*y` | Visually select paragraph and copy to system clipboard |
-| `vg_"*y` | Yank from cursor to EOL (excluding newline) to system clipboard |
+| `vg_"*y` | Yank from cursor to the last non-blank char of the line (excludes trailing whitespace, unlike `v$`) to system clipboard |
 
 > Requires Vim built `+clipboard` (gVim usually has this by default).
 
@@ -488,7 +491,7 @@ To review each change before saving:
 | Command | Description |
 |---|---|
 | `:g/temp/d` | Delete every line containing "temp" |
-| `:g/^#/d` (or `:1,$/^#/d`) | Delete every line starting with `#` |
+| `:g/^#/d` | Delete every line starting with `#` (`:g` defaults to the whole file — same as `:%g/^#/d` or `:1,$g/^#/d`) |
 | `:g!/^#/d` | Delete every line **not** starting with `#` (inverse match) |
 | `:5,10m0` | Move lines 5–10 to above line 1 |
 | `:g/pattern/normal @a` | Run macro `a` on every matching line |
@@ -502,8 +505,8 @@ To review each change before saving:
 | `:'a,'b !sort` | Sort the block of lines between marks `a` and `b` |
 | `:%!sort` | Sort the entire file |
 | `:%!sort -u` | Sort and remove duplicate lines |
-| `:'a,'b !tac` | Reverse line order between marks `a` and `b` |
-| `:r !!date` | Insert output of shell command `date` (two `!` needed on Windows) |
+| `:'a,'b !tac` | Reverse line order between marks `a` and `b` (`tac` is GNU/Linux; on macOS/BSD use `tail -r` instead) |
+| `:r !date` (some Windows gVim builds need `:r !!date`) | Insert the output of shell command `date` into the buffer |
 
 ---
 
@@ -526,9 +529,8 @@ To review each change before saving:
 | Command | Description |
 |---|---|
 | `:` then `↑` / `↓` | Recall previous commands (editable before running) |
-| `q:` | Open command-line history in a `[Command Line]` window; navigate with `j`/`k`, `Enter` to run |
-| `Ctrl-c` (in `[Command Line]` window) | Return to command line |
-| `Ctrl-c` again | Close the `[Command Line]` window |
+| `q:` | Open command-line history in a `[Command Line]` window; navigate with `j`/`k`, `Enter` on a line to run it |
+| `Esc` or `Ctrl-c` (in `[Command Line]` window) | Close the window without running anything |
 | `:his` | List command-line history |
 | `:his /` | List search history |
 
@@ -543,7 +545,7 @@ To review each change before saving:
 | `:b <Tab>` | Autocomplete menu of all buffers |
 | `:b car<Tab>` | Autocomplete buffers matching "car" (e.g. `car.c`, `car.h`) |
 | `:b! 2` | Force-switch to buffer 2, hiding buffer 1 with its changes kept |
-| `:bufdo bd` | Close all buffers |
+| `:bufdo bd` | Close all buffers (can skip some, since the buffer list shifts mid-iteration — `:%bd` is a more reliable one-shot alternative) |
 | `:bd` | Close (delete) current buffer |
 | `:set hidden` | Allow switching away from a modified buffer without saving it |
 | `:set confirm` | Prompt to save/discard/cancel when abandoning unsaved changes |
@@ -558,12 +560,18 @@ To review each change before saving:
 | `vim -p file1.txt file2.txt` | Open multiple files, each in its own tab |
 | `:tabnew` | Open a new empty tab |
 | `:tabs` | List all tabs |
-| `:tabm0` / `:tabfirst` / `0gt` / `1gt` | Move to first tab |
-| `:tabm` / `:tablast` | Move to last tab |
-| `:tabn` or `gt` | Move to next tab |
-| `:tabp` or `gT` | Move to previous tab |
+| `:tabfirst` | Go to the first tab page (navigation only) |
+| `:tablast` | Go to the last tab page (navigation only) |
+| `:tabmove 0` (or `:tabm 0`) | Move the *current* tab page to the first position (reorders tabs) |
+| `:tabmove` (or `:tabm`, no argument) | Move the current tab page to the last position (reorders tabs) |
+| `:tabn` or `gt` | Go to next tab page (wraps after the last) |
+| `:tabp` or `gT` | Go to previous tab page |
+| `{count}gt` (e.g. `1gt`) | Go to tab page number `{count}` |
 | `:tabclose` | Close current tab |
 | `:tabonly` | Close all tabs except current |
+
+> `:tabmove`/`:tabm` *reorders* tabs; `:tabfirst`/`:tablast` just *navigate* — they aren't interchangeable, despite both landing you on "the first tab" in the simple case.
+> `0gt` is **not** the same as `1gt`: a leading `0` is always its own "move to column 0" motion, never the start of a count, so `0gt` runs `0` then `gt` (next tab) as two separate commands — not "go to tab 1".
 
 ---
 
@@ -603,7 +611,9 @@ To review each change before saving:
 | `za` | Toggle fold under cursor |
 | `zR` | Open all folds |
 | `zM` | Close all folds |
-| `:set foldmethod=indent\|syntax\|manual` | Choose how folds are determined |
+| `:set foldmethod=indent\|syntax\|manual\|marker\|expr\|diff` | Choose how folds are determined |
+
+> `zf{motion}` only works when `'foldmethod'` is `manual` or `marker` — with `indent`, `syntax`, `expr`, or `diff`, folds are computed automatically and `zf` has no effect.
 
 ---
 
@@ -679,7 +689,7 @@ Toggle line wrap dynamically:
 set ignorecase smartcase   " smart case-insensitive search
 set hidden                 " allow switching buffers without saving
 set autowriteall           " auto-save when switching buffers
-set clipboard=unnamed      " sync unnamed register with system clipboard
+set clipboard=unnamed      " sync unnamed register with system clipboard (Linux: use unnamedplus for the Ctrl-C/Ctrl-V clipboard instead of the PRIMARY selection)
 set expandtab tabstop=4 shiftwidth=4   " spaces instead of tabs
 set autoindent smartindent
 set showmatch               " briefly jump to matching bracket
