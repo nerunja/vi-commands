@@ -7,8 +7,48 @@
 This matches Vim's own `:help` docs, which write it as `CTRL-X` (e.g. `:help CTRL-V`) — same key, just style/case.
 Code blocks that show actual `.vimrc` mapping syntax use Vim's angle-bracket form instead (e.g. `<C-r>`, `<Esc>`, `<CR>`), since that's the literal syntax Vim expects in a mapping.
 
+## Daily Cheat Sheet
+
+The commands most developers reach for constantly — everything here is also covered (often in more depth) in its proper category further down, repeated here so there's one small table to memorize first.
+
+| Command | Description |
+|---|---|
+| `i` / `a` / `Esc` | Insert before cursor / append after cursor / back to Normal mode |
+| `o` / `O` | Open a new line below / above and start inserting |
+| `x` | Delete the character under the cursor |
+| `dd` | Delete (cut) the current line |
+| `yy` | Yank (copy) the current line |
+| `p` / `P` | Paste after / before the cursor or line |
+| `u` / `Ctrl-r` | Undo / Redo |
+| `.` | Repeat the last change |
+| `dw` / `cw` | Delete / change to the end of the word |
+| `ciw` | Change the word under the cursor (inner word — doesn't need the cursor at the start) |
+| `caw` | Change the word under the cursor, including trailing space |
+| `ci"` / `ci(` | Change the text inside the nearest quotes / parentheses |
+| `0` / `^` / `$` | Go to start of line / first non-blank char / end of line |
+| `gg` / `G` | Go to top / bottom of file |
+| `{N}G` (e.g. `42G`) | Go to line `N` |
+| `/pattern` then `n` / `N` | Search forward; repeat search same / opposite direction |
+| `*` | Search forward for the word under the cursor |
+| `:noh` | Clear search highlighting |
+| `:%s/old/new/g` | Replace every `old` with `new` in the whole file |
+| `:s/old/new/g` | Replace every `old` with `new` on the current line only |
+| `v` / `V` / `Ctrl-v` | Visual select: characters / whole lines / block (column) |
+| `>` / `<` (on a visual selection) | Indent / un-indent the selected lines |
+| `:w` / `:q` / `:wq` (or `:x`) | Save / quit / save-and-quit |
+| `:q!` | Quit and discard unsaved changes |
+| `ZZ` | Save and quit (normal-mode shortcut for `:x`) |
+| `:e filename` | Open (or switch to) a file |
+| `Ctrl-o` / `Ctrl-i` | Jump to older / newer cursor position |
+| `:sp` / `:vsp` | Split window horizontally / vertically |
+| `Ctrl-w w` | Cycle to the next split window |
+| `gt` / `gT` | Go to next / previous tab |
+
+---
+
 ## Table of Contents
 
+- [Daily Cheat Sheet](#daily-cheat-sheet)
 - [Quick Reference / Handy One-Liners](#quick-reference--handy-one-liners)
 - [Modes & Entering Insert Mode](#modes--entering-insert-mode)
 - [Movement](#movement)
@@ -146,6 +186,12 @@ Code blocks that show actual `.vimrc` mapping syntax use Vim's angle-bracket for
 Example — `192.168.1.1`:
 - As a single **WORD**: `192.168.1.1`
 - As seven **word**s: `192` `.` `168` `.` `1` `.` `1`
+
+**Why this matters — editing an IP address (or any dotted/punctuated token):**
+- `dw` on `192.168.1.1` only deletes `192` (stops at the `.`), since `.` is a separate **word**. You'd need to repeat `dw` (or `d3w`) to clear the whole thing.
+- `dW` deletes the entire `192.168.1.1` in one go, since WORD-motions treat the whole dotted token as a single unit (only whitespace ends it).
+- Likewise, `w`/`b`/`e` will hop between `192`, `.`, `168`, etc. one punctuation-delimited piece at a time, while `W`/`B`/`E` jump straight over the whole IP (or a `key=value`, `path/to/file`, hyphenated-word, etc.) to the next whitespace-separated one.
+- Rule of thumb: use lowercase motions when you want to stop at punctuation (e.g. editing one octet); use uppercase WORD motions when you want to treat a whole punctuated token — an IP, a URL, a file path — as one hop.
 
 ---
 
