@@ -277,11 +277,11 @@ Example — `192.168.1.1`:
 
 ### Copying Non-Consecutive Lines Into a Register
 
-```text
-"aY   - yank current line into register a       (Y is synonym for yy)
-"AY   - append current line to register a       (uppercase = append, not overwrite)
-"ap   - paste the accumulated lines from register a
-```
+| Command | Description |
+|---|---|
+| `"aY` | Yank current line into register `a` (`Y` is a synonym for `yy`) — **overwrites** whatever was in `a` |
+| <mark>`"AY`</mark> | <mark>**Append** current line to register `a`</mark> — using the **uppercase** register name adds to it instead of overwriting |
+| `"ap` | Paste the accumulated lines from register `a` |
 
 ---
 
@@ -292,7 +292,7 @@ Vim has **nine types of registers**:
 1. The unnamed register `""` — always holds the most recent yank/delete
 2. Numbered registers `"0`–`"9` — `"0` holds the last yank, `"1`–`"9` rotate through recent deletes
 3. The small-delete register `"-` — holds deletes smaller than a line
-4. Named registers `"a`–`"z` / `"A`–`"Z` — user-managed; uppercase **appends** instead of overwriting
+4. Named registers `"a`–`"z` / `"A`–`"Z` — user-managed; <mark>uppercase **appends** instead of overwriting</mark>
 5. Read-only registers `":`, `".`, `"%`, `"#` — last command, last inserted text, current filename, alternate filename
 6. The expression register `"=` — evaluate an expression and insert the result
 7. Selection/drop registers `"*`, `"+`, `"~` — `"*` is the system clipboard (Windows/macOS) or the X11 PRIMARY selection (Linux); `"+` is the X11 CLIPBOARD selection (Linux only — same as `"*` on Windows/macOS); `"~` holds the last drag-and-dropped text
